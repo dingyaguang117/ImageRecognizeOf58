@@ -1,0 +1,20 @@
+<script type="text/javascript">
+document.domain='58.com';
+parent.clearPassportTimeout();
+	if(!parent.document.getElementById('mobilep')){
+		var html = '<p id="mobilep"><span class="regtlx">手机号码</span><input type="text" name="mobile" id="mobile" class="inp inw" value="" size="11" /><span id="mobile_Tip"></span></p>';
+		parent.$("#cpp").after(html);
+	}
+	if(!parent.document.getElementById('sendbtnp')){
+		var html = '<p id="sendbtnp" class="p2 f12 "><span class="regtlx">&nbsp;</span><label class="fs-btn-h"><input type="button" name="resendbtn" onclick="resendcode()" id="resendbtn" disabled="disabled" value="获取手机确认码" /></label><span class="chenggong" id="resendcode_Tip"></span>确认码短信已发送到您的手机，请查收</p>';
+		parent.$("#mobilep").after(html);
+	}
+	if(!parent.document.getElementById('mobilecodep')){
+		var html = '<p id="mobilecodep"><span class="regtlx">手机确认码</span><input type="text" name="mobilecode" id="mobileCode" class="inp inw" value="" size="20" /><span id="mobilecode_Tip"></span></p>';
+		parent.$("#sendbtnp").after(html);
+	}
+	
+			parent.$.formValidator.setTipState(null, "onError", '请填写正确的手机号码', 'mobile_Tip');
+				
+parent.$.formValidator.subfalse('submitForm', 'btnSubmit', '注册');
+</script>
