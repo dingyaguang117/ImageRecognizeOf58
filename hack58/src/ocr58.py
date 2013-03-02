@@ -18,9 +18,23 @@ with open('data.json') as f:
 
 '''
  二值化
-'''    
-def binaryzation(img):
-    threshold = 90
+'''
+def calcThreshold(img):
+    im=Image.open(img)
+    
+    L = im.convert('L').histogram()
+    sum = 0
+    threshold = 0
+    for i in xrange(len(L)):
+        sum += L[i]
+        if sum >= 530:
+            threshold = i
+            break
+#    if threshold > 105:
+#        threshold = 105
+    return threshold
+
+def binaryzation(img,threshold = 90):
     table = []
     for i in range(256):
         if i < threshold:
@@ -32,7 +46,8 @@ def binaryzation(img):
     if not isinstance(img,StringIO) and type(img) != str and type(img) != unicode:
         raise Exception('img must be StringIO or filename(str/unicode)')
     im=Image.open(img)
-    imgry = im.convert('L') 
+    imgry = im.convert('L')
+    imgry.save("bi0.bmp")
     imout = imgry.point(table,'1')  
     imout.save("bi.bmp")
     return imout
@@ -47,14 +62,14 @@ def extractChar(im):
     num = 1
     queue = []
     ff = [[0]*im.size[1] for i in xrange(im.size[0])]
-    
-    for j in xrange(im.size[1]):
-        for i in xrange(im.size[0]):
-            if pixelAccess[i,j]:
-                print ' ',
-            else:
-                print 'O',
-        print '\n'
+#   打印原始
+#    for j in xrange(im.size[1]):
+#        for i in xrange(im.size[0]):
+#            if pixelAccess[i,j]:
+#                print ' ',
+#            else:
+#                print 'O',
+#        print '\n'
         
     '''
         floodfill 提出块
@@ -80,12 +95,12 @@ def extractChar(im):
                             queue.append((x,y))
 
                 num += 1
-    
-    for j in xrange(im.size[1]):
-        for i in xrange(im.size[0]):
-            print ' ' if ff[i][j] == 0 else ff[i][j],
-        print '\n'
-    print num
+#   打印聚类 
+#    for j in xrange(im.size[1]):
+#        for i in xrange(im.size[0]):
+#            print ' ' if ff[i][j] == 0 else ff[i][j],
+#        print '\n'
+#    print num
     
     '''
         字符点阵的坐标列表，对齐到 (0,0)
@@ -134,8 +149,11 @@ def charSimilarity(charA,charB):
     s2 = set([(one[0],one[1]) for one in charB['points']])
     sumlen = len(charA['points']) + len(charB['points'])
     max = 0
-    for i in xrange(charB['width'] - charA['width'] + 1):
-        for j in xrange(charB['height'] - charA['height'] + 1):
+    # 晃动匹配
+    i_adjust = 1 if charB['width'] - charA['width'] >= 0 else -1
+    j_adjust = 1 if charB['height'] - charA['height'] >= 0 else -1
+    for i in xrange(0,charB['width'] - charA['width'] + i_adjust,i_adjust):
+        for j in xrange(0,charB['height'] - charA['height'] + j_adjust,j_adjust):
             s1 = set([(one[0]+i,one[1]+j) for one in charA['points']])
             sim = len(s1&s2) *2.0 / sumlen
             if sim > max:
@@ -148,7 +166,7 @@ def recognise(one):
     ret = None
     for char in CharMatrix:
         s = charSimilarity(one,CharMatrix[char])
-        print s * 100,"%"
+        #print s * 100,"%"
         if s > max:
             ret = char
             max = s
@@ -161,8 +179,11 @@ def recognise(one):
 '''
 def DoWork(img):
     ans = []
-    im = binaryzation(img)
-    for one in extractChar(im):
+    threshold = calcThreshold(img)
+    print 'threshold:',threshold
+    im = binaryzation(img,threshold)
+    chars = extractChar(im)
+    for one in chars:
         ans.append(recognise(one))
     return ans
 
@@ -170,31 +191,32 @@ def DoWork(img):
     获取字模
 '''
 def dump(char,dic):
-    with open('json/'+ char + '.json','wb') as f:
+    with open('../json/'+ char + '.json','wb') as f:
         f.write(json.dumps(dic))
         
 def GETSTAND():
     ans = []
-    im = binaryzation('validatecode (3).jpg')
+    im = binaryzation('../pic/Ta2px.bmp')
     for one in extractChar(im):
         ans.append(one)
     print 'LAST:',len(ans)
     if len(ans) != 5:
         print '!!!!!!!!!!! ERROR !!!!!!!!!!!!!'
     else:
-        #dump('C',ans[0])
-        dump('_k',ans[1])
-        #dump('_f',ans[2])
+        #dump('K',ans[0])
+        #dump('_k',ans[1])
+        dump('Z',ans[2])
         #dump('Y',ans[3])
-        #dump('_s',ans[4])
+        #dump('K',ans[4])
     
 def main():
-    ans = DoWork('validatecode (3).jpg')
+    ans = DoWork('../pic/rrrrrrrsrrrrr.bmp')
     print ans
 
 if __name__ == '__main__':
     main()
     #GETSTAND()
+    #calcThreshold('../pic/Ta2px.bmp')
         
                 
         

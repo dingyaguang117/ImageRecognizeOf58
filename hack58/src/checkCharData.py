@@ -1,7 +1,7 @@
 import json
 
 def show(char):
-    with open('json/%s.json'%char) as f:
+    with open('../json/%s.json'%char) as f:
         dic = json.loads(f.read())
         print dic
         for i in xrange(dic['height']):
@@ -15,7 +15,7 @@ def show(char):
 
 def main():
     pass
-    show('_k')
+    show('Z')
 
     
 if __name__ == '__main__':  
